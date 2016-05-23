@@ -1,6 +1,6 @@
 #==============================================
 # Esempio di classe con attributo e sottoclassi
-#==============================================
+#============================   ==================
 
 class LoudTalker(object):
     # qui aggiungo un attributo della classe di nome "suffix"
@@ -46,11 +46,9 @@ class Derived2(Derived1):
 #=============================================
 # Esempio di classe base con inizializzazione
 # e reimplementazione di metodi 'speciali'
-# e definizione di proprietà della classe
 #=============================================
 
 class Array(object):
-    
     # il metodo __init__ è chiamato alla creazione dell'oggetto
     # effettivamente questo metodo è un "inizializzatore"
     # il metodo __new__ è il reale costruttore della classe
@@ -81,45 +79,6 @@ class Array(object):
 
     def __setitem__(self, index, value):
         self._data[self.getOffset(index)] = value
-
-    # ...
-    def getData(self):
-        return self._data
-
-    def getBaseIndex(self):
-        return self._baseIndex
-
-    def setBaseIndex(self, baseIndex):
-        self._baseIndex = baseIndex
-
-    # Proprietà:
-    # sono modo comodo ed elegante per esporre attributi della classe
-
-    # questo è un modo di definire 2 proprietà della classe
-    # sulla base di attributi della classe
-
-    # si possono definire proprietà in sola lettura
-    # si possono definire proprietà in lettura/struttura
-    data = property(
-        fget = lambda self: self.getData())
-
-    # proprietà
-    baseIndex = property(
-        fget = lambda self: self.getBaseIndex(),
-        fset = lambda self, value: self.setBaseIndex(value))
-
-    #un secondo modo di definire le proprietà della classe
-    #è usare il decoratore @property e setter in questo modo
-
-    _age = 1
-
-    @property
-    def age(self): return self._age
-
-    @age.setter
-    def age(self, age):
-        assert age >= 0
-        self._age = age
 
 #=============================================
 # Esempio di classe astratta (solo python 3)
@@ -159,7 +118,7 @@ class AbstractTalker(object):
 
     @abc.abstractmethod
     def format(self, message):
-        return message
+        return message # oppure: raise NotImplementedError
 
     def say(self, message):
         print(self.format(message))
@@ -242,3 +201,71 @@ p1 = Point(2,3)
 p2 = Point(-1,2)
 print(p1 + p2)
 # stampa (1,5)
+
+#=============================================
+# PROPRIETÀ
+#=============================================
+
+# Proprietà:
+# sono un modo comodo ed elegante per esporre attributi della classe
+
+"""
+    property() è una funzione builtin che ritorna un oggetto di tipo property
+
+    ha la seguente signature:
+    property(fget=None, fset=None, fdel=None, doc=None)
+
+    - un esempio:
+    temperature = property(get_temperature,set_temperature)
+
+    - altro esempio con funzioni lambda:
+    data = property(
+        fget = lambda self: self.getData())
+    baseIndex = property(
+        fget = lambda self: self.getBaseIndex(),
+        fset = lambda self, value: self.setBaseIndex(value))
+"""
+
+# si possono definire proprietà in sola lettura
+# si possono definire proprietà in lettura/struttura
+
+class Celsius:
+    def __init__(self, temperature = 0):
+        self.temperature = temperature
+
+    def to_fahrenheit(self):
+        return (self.temperature * 1.8) + 32
+
+    def get_temperature(self):
+        print("Getting value")
+        return self._temperature
+
+    def set_temperature(self, value):
+        if value < -273:
+            raise ValueError("Temperature below -273 is not possible")
+        print("Setting value")
+        self._temperature = value
+
+    temperature = property(get_temperature,set_temperature)
+
+# un secondo modo di definire le proprietà della classe
+# è usare il decoratore @property e setter in questo modo
+
+class Celsius:
+    def __init__(self, temperature = 0):
+        self._temperature = temperature
+
+    def to_fahrenheit(self):
+        return (self.temperature * 1.8) + 32
+
+    @property
+    def temperature(self):
+        print("Getting value")
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        if value < -273:
+            raise ValueError("Temperature below -273 is not possible")
+        print("Setting value")
+        self._temperature = value

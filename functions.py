@@ -66,6 +66,40 @@ numbers = [55, 22, 53, 16, 67, 363612, 64361, 12556]
 lsB_ordered = sorted(numbers, key=lambda x: x & 0xFF)
 
 ####################################
+#    Metodi Statici e Metodi di Classi
+####################################
+
+class Pizza(object):
+    def __init__(self, ingredients):
+        self.ingredients = ingredients
+
+    # il metodo statico non dipende dal fatto che la classe sia istanziata
+    # il metodo statico non deve dipendere da alcun attributo interno alla classe
+    # 'Pizza().mix_ingredients is Pizza.mix_ingredients' ritorna True
+
+    @staticmethod
+    def mix_ingredients(x, y):
+        return x + y
+
+    # il metodo di classo non dipende dall'oggetto in se ma dalla classe a cui è legato
+    # è molto simile al metodo statico ma permette di referenziare al suo interno in
+    # modo dinamico il nome delle classe e i suoi attributi
+    # 'Pizza.get_radius is Pizza().get_radius' ritorna True
+    # posso usare il parametro 'cls' al posto di 'self'
+
+    @classmethod
+    def from_fridge(cls, fridge):
+        return cls(fridge.get_cheese() + fridge.get_vegetables())
+
+    radius = 42
+    @classmethod
+    def get_radius(cls):
+        return cls.radius
+
+    def cook(self):
+        return self.mix_ingredients(self.cheese, self.vegetables)
+
+####################################
 #    Descrittori
 ####################################
 
@@ -92,41 +126,118 @@ me.sleep() # Prints "zzz"
 #    Decoratori
 ####################################
 
-def function():
-    pass
-f = staticmethod(function)
+"""Le funzioni e i metodi sono chiamati 'callable'
+In fatti ciascun oggetto che implementa il metodo speciale __call__ è tale
+Un decoratore è un 'callable' che ritorna un 'callable' aggiungendo o modificando
+funzionalità di esso"""
 
-@staticmethod
-def f(...):
-    pass
+# make_pretty è un decoratore
+def make_pretty(func):
+    def inner():
+        print("I got decorated")
+        func()
+    return inner
 
-#Python has a special syntax that allows you to wrap or "decorate" functions (and classes) at compile time:
-#
-#The off_by_one function takes a function as it's sole argument and returns a new function.
+def ordinary():
+    print("I am ordinary")
 
-#We decorated the add function with off_by_one by placing @off_by_one above the function definition. This is equivalent to writing the following after the definition:
+ordinary()
+#stampa:
+#I am ordinary
 
-def off_by_one(original_function):
-    def new_function(x, y):
-        return original_function(x, y) + 1
-    return new_function
+pretty = make_pretty(ordinary)
+pretty() #l'oggetto callable pretty è stato decorato
 
-@off_by_one
-def add(x, y):
-    return x + y
+#stampa:
+#I got decorated
+#I am ordinary
 
+#### Invece di fare l'assegnamento nella penultima riga è possibile #####
+@make_pretty
+def ordinary():
+    print("I am ordinary")
 
+# che ottiene lo stesso effetto che:
+def ordinary():
+    print("I am ordinary")
+ordinary = make_pretty(ordinary)
+
+#######################################
+#   DECORATORI CONCATENATI
+#######################################
+def star(func):
+    def inner(*args, **kwargs):
+        print("*" * 30)
+        func(*args, **kwargs)
+        print("*" * 30)
+    return inner
+
+def percent(func):
+    def inner(*args, **kwargs):
+        print("%" * 30)
+        func(*args, **kwargs)
+        print("%" * 30)
+    return inner
+
+@star
+@percent
+def printer(msg):
+    print(msg)
+
+"""stampa (l'ordine di scrittura del decoratore è importante):
+
+******************************
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Hello
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+******************************
+
+"""
+
+#######################################
+#   DECORATORI DI FUNZIONI CON PARAMETRI FISSI
+#######################################
+def smart_divide(func):
+    def inner(a,b):
+        print("I am going to divide",a,"and",b)
+        if b == 0:
+            print("Whoops! cannot divide")
+            return
+
+        return func(a,b)    # quando si ritorna la funzione decorata vanno rispettati i parametri
+    return inner
+
+@smart_divide
+def divide(a,b):
+    return a/b
+
+#######################################
+#   DECORATORI DI FUNZIONI CON PARAMETRI VARIABILI
+#######################################
+
+"""un esempio di decoratore parametri variabili:
+
+ possiamo riferirci ai parametri di qualsiasi funzione passata in ingresso
+ siccome 'args' è una serie di tuple con i nomi degli argomenti ordinati
+ e 'kwargs' è il dizionario con i valori per ciascun argomento
+"""
+def works_for_all(func):
+    def inner(*args, **kwargs):
+        print("I can decorate any function")
+        return func(*args, **kwargs)
+    return inner
 
 ####################################
 #    GENERATORI
 ####################################
 
-# si costruiscono utilizzando l'istruzione 'yield'
-# in questo modo i metodi __iter__ e __next__ di un iteratore
-# generico sono implementati automaticamente
+"""si costruiscono utilizzando l'istruzione 'yield'
+ in questo modo i metodi __iter__ e __next__ di un iteratore
+ generico sono implementati automaticamente
 
-# in questa funzione il valore di n è ricordato per ogni chiamata
-# fino all'ultimo statement yield
+ in questa funzione il valore di n è ricordato per ogni chiamata
+ fino all'ultimo statement yield
+ """
 def my_gen():
     """a simple generator function"""
     n = 1
@@ -166,7 +277,8 @@ for record in get_all_records(lookup, keys):
  che permettono di scorrere un insieme di oggetti dello stesso tipo
  Sono definibili con la parola chiave __iter__
 
- La funzione next() si può utilizzare per scorrere con l'iteratore l'insieme ordinato"""
+ La funzione next() si può utilizzare per scorrere con l'iteratore l'insieme ordinato
+ """
 
 with open('/etc/passwd') as f:
     while True:
@@ -198,3 +310,12 @@ class BackwardsSequence(list):
 #Stringification(__str__, __unicode__, __repr__)
 #Descriptors(__get__, __set__)
 #Instance Creation(__new__, __metaclass__ attribute)
+
+
+def function():
+    pass
+f = staticmethod(function)
+
+@staticmethod
+def f(...):
+    pass
