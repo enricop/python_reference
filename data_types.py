@@ -47,7 +47,7 @@ my_list2 = ['p','r','o','g','r','a','m','i','z']
 my_list2[5:]
 
 a = [0, 0, 0, 0, 0] # crea lista
-b = a               # in python l'operazione di l'assegnamento copia imposta un nome all'oggetto 'b'
+b = a               # in python l'operazione di assegnamento imposta un nome all'oggetto 'b'
                     # causa la variabile 'b' a riferirsi allo stesso oggetto della variabile 'a'
 
 a.append(3)         # estende la lista con un sesto elemento 3

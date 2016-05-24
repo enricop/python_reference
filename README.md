@@ -1,5 +1,5 @@
 
-examples, code, and explanations take from:
+examples, code, and explanations taken from:
 
 https://stephensugden.com/crash_into_python
 
